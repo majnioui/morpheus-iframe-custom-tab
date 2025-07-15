@@ -51,30 +51,6 @@ class IframeInstanceTabPlugin extends Plugin {
             inputType: OptionType.InputType.TEXT
         )
 
-        this.settings << new OptionType(
-            name: "Iframe URL",
-            code: "iit-iframe-url",
-            fieldName: "iframeUrl",
-            displayOrder: 2,
-            fieldLabel: "Iframe URL",
-            helpText: 'URL to display in the Iframe, without (https:// or http://)',
-            required: true,
-            inputType: OptionType.InputType.TEXT
-        )
-
-        this.settings << new OptionType(
-            name: "Iframe Height",
-            code: "iit-iframe-height",
-            fieldName: "iframeHeight",
-            displayOrder: 3,
-            fieldLabel: "Iframe Height",
-            helpText: 'Height in pixels',
-            required: true,
-            inputType: OptionType.InputType.TEXT
-        )
-
-        // we could add fields to manage border and scrolling behaviours
-
 	}
 
 	@Override

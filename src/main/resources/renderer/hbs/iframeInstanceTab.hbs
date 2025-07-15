@@ -1,6 +1,15 @@
 <div>
-    <h2>{{tabTitle}}</h2>
-</div>
-<div>
-    <iframe id="fr" src="{{iframeUrl}}" width="100%" height="{{iframeHeight}}" style="border:1px solid #555555;"></iframe>
+    {{#if error}}
+        <div style="color: red; font-weight: bold;">Error: {{error}}</div>
+    {{/if}}
+    <h2>Organizations</h2>
+    {{#if orgs}}
+        <ul>
+        {{#each orgs.values}}
+            <li><strong>{{name}}</strong> (ID: {{id}})</li>
+        {{/each}}
+        </ul>
+    {{else}}
+        <p>No organizations found or failed to load.</p>
+    {{/if}}
 </div>
