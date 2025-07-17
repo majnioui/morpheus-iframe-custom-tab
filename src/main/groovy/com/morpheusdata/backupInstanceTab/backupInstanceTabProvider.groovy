@@ -91,11 +91,15 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
         try {
             def settings = getPluginSettings()
             String apiBaseUrl = settings.apiBaseUrl ?: "https://portal.cdc.atlascs.ma"
-            URL url = new URL("${apiBaseUrl}/cloudapi/1.0.0/orgs")
+            // Add required query parameters for pagination
+            int page = 1
+            int pageSize = 25
+            String orgsUrl = "${apiBaseUrl}/cloudapi/1.0.0/orgs?page=${page}&pageSize=${pageSize}"
+            URL url = new URL(orgsUrl)
             HttpURLConnection connection = (HttpURLConnection) url.openConnection()
             connection.setRequestMethod("GET")
             connection.setRequestProperty("Authorization", "Bearer ${token}")
-            connection.setRequestProperty("Accept", "application/*+xml;version=38.1")
+            connection.setRequestProperty("Accept", "application/json;version=38.1")
             connection.connect()
             String response = connection.inputStream.text
             connection.disconnect()
