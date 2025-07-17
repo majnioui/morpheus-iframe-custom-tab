@@ -1,6 +1,6 @@
-# PowerM Iframe Tab Plugin
+# PowerM Tab Plugin
 
-A working Morpheus instance tab plugin template to iframe any site.
+
 - This template is ready to use as-is, but you can adjust it for your needs.
 
 ## Requirements
@@ -24,7 +24,7 @@ A working Morpheus instance tab plugin template to iframe any site.
 
 ## Notes
 
-- Edit the files in `src/main/groovy/com/morpheusdata/iframeInstanceTab/` to change the plugin logic.
-- Update the template in `src/main/resources/renderer/hbs/iframeInstanceTab.hbs` to modify the iframe rendering.
+- Edit the files in `src/main/groovy/com/morpheusdata/backupInstanceTab/` to change the plugin logic.
+- Update the template in `src/main/resources/renderer/hbs/backupInstanceTab.hbs` to modify the tab rendering.
 
 

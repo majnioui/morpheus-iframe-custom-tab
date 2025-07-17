@@ -63,7 +63,7 @@ sourceSets {
 jar {
 	manifest {
 		attributes(
-				'Plugin-Class': 'com.morpheusdata.iframeInstanceTab.IframeInstanceTabPlugin',
+				'Plugin-Class': 'com.morpheusdata.backupInstanceTab.BackupInstanceTabPlugin',
 				'Plugin-Version': version,
 		)
 	}

@@ -1,4 +1,4 @@
-package com.morpheusdata.iframeInstanceTab
+package com.morpheusdata.backupInstanceTab
 
 import com.morpheusdata.core.AbstractInstanceTabProvider
 import com.morpheusdata.core.MorpheusContext
@@ -20,15 +20,15 @@ import java.net.URL
 import java.util.Base64
 
 @Slf4j
-class IframeInstanceTabProvider extends AbstractInstanceTabProvider {
+class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
 	Plugin plugin
 	MorpheusContext morpheus
-    String iframeUrl
+    String customTabUrl
 
-    String code = "iframe-instance-tab"
+    String code = "backup-instance-tab"
 	String name = "PowerM Instance Tab Provider"
 
-	IframeInstanceTabProvider(Plugin plugin, MorpheusContext context) {
+	BackupInstanceTabProvider(Plugin plugin, MorpheusContext context) {
 		this.plugin = plugin
 		this.morpheus = context
 	}
@@ -36,7 +36,7 @@ class IframeInstanceTabProvider extends AbstractInstanceTabProvider {
     // Helper method to get session token, now returns [token, error]
     private List getSessionToken() {
         try {
-            URL url = new URL("https://portal.bdc.atlascs.ma/api/sessions")
+            URL url = new URL("https://portal.cdc.atlascs.ma/api/sessions")
             HttpURLConnection connection = (HttpURLConnection) url.openConnection()
             connection.setRequestMethod("POST")
             String userCredentials = "mcmadmin4@MCM-Org:ACSPower!2025!"
@@ -67,7 +67,7 @@ class IframeInstanceTabProvider extends AbstractInstanceTabProvider {
     // Helper method to fetch orgs, now returns [orgs, error]
     private List fetchOrgs(String token) {
         try {
-            URL url = new URL("https://portal.bdc.atlascs.ma/cloudapi/1.0.0/orgs")
+            URL url = new URL("https://portal.cdc.atlascs.ma/cloudapi/1.0.0/orgs")
             HttpURLConnection connection = (HttpURLConnection) url.openConnection()
             connection.setRequestMethod("GET")
             connection.setRequestProperty("Authorization", "Bearer ${token}")
@@ -102,7 +102,7 @@ class IframeInstanceTabProvider extends AbstractInstanceTabProvider {
         }
         ViewModel<Instance> model = new ViewModel<>()
         model.object = viewData
-        getRenderer().renderTemplate("hbs/iframeInstanceTab", model)
+        getRenderer().renderTemplate("hbs/backupInstanceTab", model)
     }
 
 	@Override

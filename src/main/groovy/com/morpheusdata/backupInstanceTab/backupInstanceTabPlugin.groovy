@@ -1,4 +1,4 @@
-package com.morpheusdata.iframeInstanceTab
+package com.morpheusdata.backupInstanceTab
 
 import com.morpheusdata.core.Plugin
 import com.morpheusdata.model.Permission
@@ -7,31 +7,31 @@ import com.morpheusdata.model.OptionType
 import groovy.util.logging.Slf4j
 
 @Slf4j
-class IframeInstanceTabPlugin extends Plugin {
+class BackupInstanceTabPlugin extends Plugin {
 
-    String code = "iframe-instance-tab"
+    String code = "backup-instance-tab"
 
 	@Override
 	void initialize() {
 	    // set additional metadata
-		this.setName("BackupPowerM")
+		this.setName("Backup PowerM")
 		this.setDescription("Custom tab Integration by PowerM")
 		this.setAuthor("PowerM")
 
         // call and register the tab provider
-        IframeInstanceTabProvider iframeInstanceTabProvider = new IframeInstanceTabProvider(this, morpheus)
-        this.pluginProviders.put(iframeInstanceTabProvider.code, iframeInstanceTabProvider)
+        BackupInstanceTabProvider backupInstanceTabProvider = new BackupInstanceTabProvider(this, morpheus)
+        this.pluginProviders.put(backupInstanceTabProvider.code, backupInstanceTabProvider)
 
         //this.setRenderer(new HandlebarsRenderer(this.classLoader))
 
         // create a permission
-		this.setPermissions([Permission.build('PowerM Instance Tab Plugin','iframe-instance-tab', [Permission.AccessType.none, Permission.AccessType.full])])
+		this.setPermissions([Permission.build('PowerM Instance Tab Plugin','backup-instance-tab', [Permission.AccessType.none, Permission.AccessType.full])])
 
-	    // configuration options for iframe
+	    // configuration options for the plugin
 
 	    this.settings << new OptionType(
             name: "Tab Name",
-            code: "iit-instance-tab-name",
+            code: "backup-instance-tab-name",
             fieldName: "instanceTabName",
             displayOrder: 0,
             fieldLabel: "Tab Name",
@@ -42,7 +42,7 @@ class IframeInstanceTabPlugin extends Plugin {
 
         this.settings << new OptionType(
             name: "Tab Title",
-            code: "iit-tab-title",
+            code: "backup-instance-tab-title",
             fieldName: "instanceTabTitle",
             displayOrder: 1,
             fieldLabel: "Tab Title",
