@@ -30,23 +30,23 @@ class BackupInstanceTabPlugin extends Plugin {
 	    // configuration options for the plugin
 
 	    this.settings << new OptionType(
-            name: "Tab Name",
-            code: "backup-instance-tab-name",
+            name: "Instance Tab Name",
+            code: "bit-instance-tab-name",
             fieldName: "instanceTabName",
             displayOrder: 0,
-            fieldLabel: "Tab Name",
-            helpText: 'Enter Tab name',
+            fieldLabel: "Instance Tab Name",
+            helpText: 'Enter a name for this Tab',
             required: true,
             inputType: OptionType.InputType.TEXT
         )
 
         this.settings << new OptionType(
             name: "Tab Title",
-            code: "backup-instance-tab-title",
+            code: "bit-tab-title",
             fieldName: "instanceTabTitle",
             displayOrder: 1,
-            fieldLabel: "Tab Title",
-            helpText: 'Title to appear at the top of the Instance Tab view',
+            fieldLabel: "Instance Tab Title",
+            helpText: 'Enter a title to appear at the top of the Instance Tab view',
             required: true,
             inputType: OptionType.InputType.TEXT
         )

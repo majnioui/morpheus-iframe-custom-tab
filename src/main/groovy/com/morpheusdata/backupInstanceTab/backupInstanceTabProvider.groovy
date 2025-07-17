@@ -33,17 +33,32 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
 		this.morpheus = context
 	}
 
+    // Helper method to fetch and parse plugin settings
+    private Map getPluginSettings() {
+        def settings = [:]
+        try {
+            def pluginSettings = morpheus.getSettings(plugin)
+            def settingsOutput = ""
+            pluginSettings.subscribe({ outData -> settingsOutput = outData }, { error -> log.error(error.printStackTrace()) })
+            def slurper = new groovy.json.JsonSlurper()
+            settings = slurper.parseText(settingsOutput)
+        } catch (Exception ex) {
+            log.error("Could not parse plugin settings: ", ex)
+        }
+        return settings
+    }
+
     // Helper method to get session token, now returns [token, error]
     private List getSessionToken() {
         try {
-            // Read settings from plugin
-            String apiBaseUrl = plugin.settingsMap?.apiBaseUrl ?: "https://portal.cdc.atlascs.ma"
-            String apiUsername = plugin.settingsMap?.apiUsername ?: ""
-            String apiPassword = plugin.settingsMap?.apiPassword ?: ""
+            def settings = getPluginSettings()
+            String apiBaseUrl = settings.apiBaseUrl ?: "https://portal.cdc.atlascs.ma"
+            String apiUsername = settings.apiUsername ?: "mcmadmin4@MCM-Org"
+            String apiPassword = settings.apiPassword ?: "ACSPower!2025!"
             if(!apiBaseUrl || !apiUsername || !apiPassword) {
                 return [null, "API base URL, username, or password not configured in plugin settings."]
             }
-            URL url = new URL("${apiBaseUrl}/api/sessions")
+            URL url = new URL("${apiBaseUrl}/cloudapi/1.0.0/sessions")
             HttpURLConnection connection = (HttpURLConnection) url.openConnection()
             connection.setRequestMethod("POST")
             String userCredentials = "${apiUsername}:${apiPassword}"
@@ -74,7 +89,8 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
     // Helper method to fetch orgs, now returns [orgs, error]
     private List fetchOrgs(String token) {
         try {
-            String apiBaseUrl = plugin.settingsMap?.apiBaseUrl ?: "https://portal.cdc.atlascs.ma"
+            def settings = getPluginSettings()
+            String apiBaseUrl = settings.apiBaseUrl ?: "https://portal.cdc.atlascs.ma"
             URL url = new URL("${apiBaseUrl}/cloudapi/1.0.0/orgs")
             HttpURLConnection connection = (HttpURLConnection) url.openConnection()
             connection.setRequestMethod("GET")
@@ -94,6 +110,13 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
     @Override
     HTMLResponse renderTemplate(Instance instance) {
         def viewData = [:]
+        def settings = getPluginSettings()
+        // Set the tab name dynamically from settings if available
+        if (settings.instanceTabName) {
+            name = settings.instanceTabName
+        }
+        // Add tabTitle to viewData for the template
+        viewData['tabTitle'] = settings.instanceTabTitle
         def (token, authError) = getSessionToken()
         if (authError) {
             viewData['error'] = authError
