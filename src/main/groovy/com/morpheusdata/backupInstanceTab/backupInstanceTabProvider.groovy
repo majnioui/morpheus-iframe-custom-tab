@@ -64,7 +64,7 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
             String userCredentials = "${apiUsername}:${apiPassword}"
             String basicAuth = "Basic " + Base64.encoder.encodeToString(userCredentials.getBytes("UTF-8"))
             connection.setRequestProperty("Authorization", basicAuth)
-            connection.setRequestProperty("Accept", "application/*+xml;version=38.1")
+            connection.setRequestProperty("Accept", "application/json;version=38.1")
             connection.setDoOutput(true)
             connection.connect()
             String token = connection.getHeaderField("x-vmware-vcloud-access-token")
