@@ -36,10 +36,17 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
     // Helper method to get session token, now returns [token, error]
     private List getSessionToken() {
         try {
-            URL url = new URL("https://portal.cdc.atlascs.ma/api/sessions")
+            // Read settings from plugin
+            String apiBaseUrl = plugin.settingsMap?.apiBaseUrl ?: "https://portal.cdc.atlascs.ma"
+            String apiUsername = plugin.settingsMap?.apiUsername ?: ""
+            String apiPassword = plugin.settingsMap?.apiPassword ?: ""
+            if(!apiBaseUrl || !apiUsername || !apiPassword) {
+                return [null, "API base URL, username, or password not configured in plugin settings."]
+            }
+            URL url = new URL("${apiBaseUrl}/api/sessions")
             HttpURLConnection connection = (HttpURLConnection) url.openConnection()
             connection.setRequestMethod("POST")
-            String userCredentials = "mcmadmin4@MCM-Org:ACSPower!2025!"
+            String userCredentials = "${apiUsername}:${apiPassword}"
             String basicAuth = "Basic " + Base64.encoder.encodeToString(userCredentials.getBytes("UTF-8"))
             connection.setRequestProperty("Authorization", basicAuth)
             connection.setRequestProperty("Accept", "application/*+xml;version=38.1")
@@ -67,7 +74,8 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
     // Helper method to fetch orgs, now returns [orgs, error]
     private List fetchOrgs(String token) {
         try {
-            URL url = new URL("https://portal.cdc.atlascs.ma/cloudapi/1.0.0/orgs")
+            String apiBaseUrl = plugin.settingsMap?.apiBaseUrl ?: "https://portal.cdc.atlascs.ma"
+            URL url = new URL("${apiBaseUrl}/cloudapi/1.0.0/orgs")
             HttpURLConnection connection = (HttpURLConnection) url.openConnection()
             connection.setRequestMethod("GET")
             connection.setRequestProperty("Authorization", "Bearer ${token}")

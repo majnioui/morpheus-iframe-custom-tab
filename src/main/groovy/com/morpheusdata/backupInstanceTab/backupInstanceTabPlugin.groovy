@@ -51,6 +51,39 @@ class BackupInstanceTabPlugin extends Plugin {
             inputType: OptionType.InputType.TEXT
         )
 
+        this.settings << new OptionType(
+            name: "API Base URL",
+            code: "backup-instance-tab-api-base-url",
+            fieldName: "apiBaseUrl",
+            displayOrder: 2,
+            fieldLabel: "API Base URL",
+            helpText: 'Enter the base URL for the API (e.g., https://portal.cdc.atlascs.ma)',
+            required: true,
+            inputType: OptionType.InputType.TEXT
+        )
+
+        this.settings << new OptionType(
+            name: "Username",
+            code: "backup-instance-tab-api-username",
+            fieldName: "apiUsername",
+            displayOrder: 3,
+            fieldLabel: "Username",
+            helpText: 'Enter the username for API authentication',
+            required: true,
+            inputType: OptionType.InputType.TEXT
+        )
+
+        this.settings << new OptionType(
+            name: "Password",
+            code: "backup-instance-tab-api-password",
+            fieldName: "apiPassword",
+            displayOrder: 4,
+            fieldLabel: "Password",
+            helpText: 'Enter the password for API authentication',
+            required: true,
+            inputType: OptionType.InputType.PASSWORD
+        )
+
 	}
 
 	@Override
