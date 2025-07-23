@@ -52,10 +52,10 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
     private List getSessionToken() {
         try {
             def settings = getPluginSettings()
-            String apiBaseUrl = settings.apiBaseUrl ?: "https://portal.cdc.atlascs.ma"
-            String apiUsername = settings.apiUsername ?: "mcmadmin4@MCM-Org"
-            String apiPassword = settings.apiPassword ?: "ACSPower!2025!"
-            if(!apiBaseUrl || !apiUsername || !apiPassword) {
+            String apiBaseUrl = settings.apiBaseUrl
+            String apiUsername = settings.apiUsername
+            String apiPassword = settings.apiPassword
+            if (!apiBaseUrl || !apiUsername || !apiPassword) {
                 return [null, "API base URL, username, or password not configured in plugin settings."]
             }
             URL url = new URL("${apiBaseUrl}/cloudapi/1.0.0/sessions")
@@ -87,15 +87,12 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
     }
 
     // Helper method to fetch orgs, now returns [orgs, error]
-    private List fetchOrgs(String token) {
+    private List fetchUiExtensions(String token) {
         try {
             def settings = getPluginSettings()
             String apiBaseUrl = settings.apiBaseUrl ?: "https://portal.cdc.atlascs.ma"
-            // Add required query parameters for pagination
-            int page = 1
-            int pageSize = 25
-            String orgsUrl = "${apiBaseUrl}/cloudapi/1.0.0/orgs?page=${page}&pageSize=${pageSize}"
-            URL url = new URL(orgsUrl)
+            String urlStr = "${apiBaseUrl}/cloudapi/extensions/ui"
+            URL url = new URL(urlStr)
             HttpURLConnection connection = (HttpURLConnection) url.openConnection()
             connection.setRequestMethod("GET")
             connection.setRequestProperty("Authorization", "Bearer ${token}")
@@ -106,8 +103,8 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
             def json = new groovy.json.JsonSlurper().parseText(response)
             return [json, null]
         } catch (Exception ex) {
-            log.error("Failed to fetch orgs: ${ex.message}")
-            return [null, "Fetch orgs error: ${ex.message}"]
+            log.error("Failed to fetch UI extensions: ${ex.message}")
+            return [null, "Fetch UI extensions error: ${ex.message}"]
         }
     }
 
@@ -124,14 +121,14 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
         def (token, authError) = getSessionToken()
         if (authError) {
             viewData['error'] = authError
-            viewData['orgs'] = null
+            viewData['uiExtensions'] = null
         } else {
-            def (orgs, orgsError) = fetchOrgs(token)
-            if (orgsError) {
-                viewData['error'] = orgsError
-                viewData['orgs'] = null
+            def (uiExtensions, uiExtensionsError) = fetchUiExtensions(token)
+            if (uiExtensionsError) {
+                viewData['error'] = uiExtensionsError
+                viewData['uiExtensions'] = null
             } else {
-                viewData['orgs'] = orgs
+                viewData['uiExtensions'] = uiExtensions
                 viewData['error'] = null
             }
         }

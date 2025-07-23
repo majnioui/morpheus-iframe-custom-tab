@@ -2,14 +2,27 @@
     {{#if error}}
         <div style="color: red; font-weight: bold;">Error: {{error}}</div>
     {{/if}}
-    <h2>Organizations</h2>
-    {{#if orgs}}
+    <h2>UI Extensions</h2>
+    {{#if uiExtensions}}
         <ul>
-        {{#each orgs.values}}
-            <li><strong>{{name}}</strong> (ID: {{id}})</li>
+        {{#each uiExtensions}}
+            <li style="margin-bottom: 1em;">
+                <strong>Name:</strong> {{pluginName}}<br/>
+                <strong>Vendor:</strong> {{vendor}}<br/>
+                <strong>Description:</strong> {{description}}<br/>
+                <strong>Version:</strong> {{version}}<br/>
+                <strong>License:</strong> {{license}}<br/>
+                <strong>Link:</strong> <a href="{{link}}" target="_blank">{{link}}</a><br/>
+                <strong>Tenant Scoped:</strong> {{tenant_scoped}}<br/>
+                <strong>Provider Scoped:</strong> {{provider_scoped}}<br/>
+                <strong>Enabled:</strong> {{enabled}}<br/>
+                <strong>ID:</strong> {{id}}<br/>
+                <strong>Plugin Status:</strong> {{plugin_status}}<br/>
+                <strong>Resource Path:</strong> {{resourcePath}}
+            </li>
         {{/each}}
         </ul>
     {{else}}
-        <p>No organizations found or failed to load.</p>
+        <p>No UI extensions found or failed to load.</p>
     {{/if}}
 </div>
