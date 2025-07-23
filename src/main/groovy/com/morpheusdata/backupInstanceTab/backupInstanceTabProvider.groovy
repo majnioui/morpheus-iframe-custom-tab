@@ -90,7 +90,7 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
     private List fetchUiExtensions(String token) {
         try {
             def settings = getPluginSettings()
-            String apiBaseUrl = settings.apiBaseUrl ?: "https://portal.cdc.atlascs.ma"
+            String apiBaseUrl = settings.apiBaseUrl
             String urlStr = "${apiBaseUrl}/cloudapi/extensions/ui"
             URL url = new URL(urlStr)
             HttpURLConnection connection = (HttpURLConnection) url.openConnection()
