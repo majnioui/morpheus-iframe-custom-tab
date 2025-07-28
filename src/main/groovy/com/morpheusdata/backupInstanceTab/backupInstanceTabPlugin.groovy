@@ -63,23 +63,23 @@ class BackupInstanceTabPlugin extends Plugin {
         )
 
         this.settings << new OptionType(
-            name: "Username",
-            code: "backup-instance-tab-api-username",
-            fieldName: "apiUsername",
+            name: "User",
+            code: "backup-instance-tab-vcd-user",
+            fieldName: "vcdUser",
             displayOrder: 3,
-            fieldLabel: "Username",
-            helpText: 'Enter the username for API authentication',
+            fieldLabel: "Cloud Director User",
+            helpText: 'Enter the vCD user (e.g., admin1@org2)',
             required: true,
             inputType: OptionType.InputType.TEXT
         )
 
         this.settings << new OptionType(
             name: "Password",
-            code: "backup-instance-tab-api-password",
-            fieldName: "apiPassword",
+            code: "backup-instance-tab-vcd-password",
+            fieldName: "vcdPassword",
             displayOrder: 4,
-            fieldLabel: "Password",
-            helpText: 'Enter the password for API authentication',
+            fieldLabel: "Cloud Director Password",
+            helpText: 'Enter the password',
             required: true,
             inputType: OptionType.InputType.PASSWORD
         )

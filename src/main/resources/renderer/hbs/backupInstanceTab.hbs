@@ -1,21 +1,93 @@
+<style>
+    .backup-error {
+        color: red;
+        font-weight: bold;
+        margin-bottom: 20px;
+        padding: 10px;
+        border: 1px solid red;
+        background-color: #ffebee;
+    }
+    .backup-table-container {
+        overflow-x: auto;
+        margin-top: 15px;
+    }
+    .backup-table {
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #ddd;
+        font-family: Arial, sans-serif;
+    }
+    .backup-table th {
+        border: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+    .backup-table td {
+        border: 1px solid #ddd;
+        padding: 12px;
+        vertical-align: top;
+    }
+    .backup-table tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    .backup-guid {
+        font-family: monospace;
+        font-size: 12px;
+        word-break: break-all;
+    }
+    .backup-no-data {
+        color: #666;
+        font-style: italic;
+        padding: 20px;
+        text-align: center;
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        margin-top: 15px;
+    }
+    .backup-header {
+        color: #2196F3;
+        border-bottom: 2px solid #2196F3;
+        padding-bottom: 5px;
+        margin-bottom: 15px;
+    }
+</style>
+
 <div>
     {{#if error}}
-        <div style="color: red; font-weight: bold;">Error: {{error}}</div>
+        <div class="backup-error">Error: {{error}}</div>
     {{/if}}
-    <h2>UI Extensions</h2>
-    {{#if uiExtensions}}
-        <ul>
-        {{#each uiExtensions}}
-            <li style="margin-bottom: 1em;">
-                <strong>Name:</strong> {{pluginName}}<br/>
-                <strong>Description:</strong> {{description}}<br/>
-                <strong>Version:</strong> {{version}}<br/>
-                <strong>Enabled:</strong> {{enabled}}<br/>
-                <strong>ID:</strong> {{id}}<br/>
-            </li>
-        {{/each}}
-        </ul>
+    {{#if backups}}
+        <div class="backup-table-container">
+            <table class="backup-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>GUID</th>
+                        <th>Status</th>
+                        <th>Policy</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each backups}}
+                        <tr>
+                            <td>{{vAppName}}</td>
+                            <td class="backup-guid">{{vAppguid}}</td>
+                            <td>{{status}}</td>
+                            <td>{{policyName}}</td>
+                        </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+        <p style="margin-top: 10px; color: #666; font-size: 14px;">
+            Total backups found: <strong>{{backups.length}}</strong>
+        </p>
     {{else}}
-        <p>No UI extensions found or failed to load.</p>
+        <div class="backup-no-data">
+            No backups found or failed to load.
+        </div>
     {{/if}}
 </div>

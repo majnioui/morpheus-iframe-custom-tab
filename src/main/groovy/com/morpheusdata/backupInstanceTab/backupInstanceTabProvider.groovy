@@ -48,26 +48,26 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
         return settings
     }
 
-    // Helper method to get session token, now returns [token, error]
-    private List getSessionToken() {
+    // Helper method to get vCD session token, returns [token, error]
+    private List getVcdSessionToken() {
         try {
             def settings = getPluginSettings()
             String apiBaseUrl = settings.apiBaseUrl
-            String apiUsername = settings.apiUsername
-            String apiPassword = settings.apiPassword
-            if (!apiBaseUrl || !apiUsername || !apiPassword) {
-                return [null, "API base URL, username, or password not configured in plugin settings."]
+            String vcdUser = settings.vcdUser
+            String vcdPassword = settings.vcdPassword
+            if (!apiBaseUrl || !vcdUser || !vcdPassword) {
+                return [null, "API base URL, vcdUser, or vcdPassword not configured in plugin settings."]
             }
-            URL url = new URL("${apiBaseUrl}/cloudapi/1.0.0/sessions")
+            URL url = new URL("${apiBaseUrl}/api/sessions")
             HttpURLConnection connection = (HttpURLConnection) url.openConnection()
             connection.setRequestMethod("POST")
-            String userCredentials = "${apiUsername}:${apiPassword}"
+            String userCredentials = "${vcdUser}:${vcdPassword}"
             String basicAuth = "Basic " + Base64.encoder.encodeToString(userCredentials.getBytes("UTF-8"))
             connection.setRequestProperty("Authorization", basicAuth)
-            connection.setRequestProperty("Accept", "application/json;version=38.1")
-            connection.setDoOutput(true)
+            connection.setRequestProperty("Accept", "application/*+xml;version=36.0")
+            connection.setDoOutput(false)
             connection.connect()
-            String token = connection.getHeaderField("x-vmware-vcloud-access-token")
+            String token = connection.getHeaderField("x-vcloud-authorization")
             if (!token) {
                 String errorMsg = null
                 try {
@@ -81,30 +81,94 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
             connection.disconnect()
             return [token, null]
         } catch (Exception ex) {
-            log.error("Failed to get session token: ${ex.message}")
+            log.error("Failed to get vCD session token: ${ex.message}")
             return [null, "Auth error: ${ex.message}"]
         }
     }
 
-    // Helper method to fetch orgs, now returns [orgs, error]
-    private List fetchUiExtensions(String token) {
+    // Helper method to fetch backups, returns [backups, error]
+    private List fetchBackups(String token) {
         try {
             def settings = getPluginSettings()
             String apiBaseUrl = settings.apiBaseUrl
-            String urlStr = "${apiBaseUrl}/cloudapi/extensions/ui"
+            String urlStr = "${apiBaseUrl}/backups"
             URL url = new URL(urlStr)
             HttpURLConnection connection = (HttpURLConnection) url.openConnection()
             connection.setRequestMethod("GET")
-            connection.setRequestProperty("Authorization", "Bearer ${token}")
-            connection.setRequestProperty("Accept", "application/json;version=38.1")
+            connection.setRequestProperty("X-VCAV-Auth", token)
+            connection.setRequestProperty("Accept", "application/json")
             connection.connect()
             String response = connection.inputStream.text
             connection.disconnect()
             def json = new groovy.json.JsonSlurper().parseText(response)
             return [json, null]
         } catch (Exception ex) {
-            log.error("Failed to fetch UI extensions: ${ex.message}")
-            return [null, "Fetch UI extensions error: ${ex.message}"]
+            log.error("Failed to fetch backups: ${ex.message}")
+            return [null, "Fetch backups error: ${ex.message}"]
+        }
+    }
+
+    // Helper to fetch backup repositories for a VDC
+    private List fetchBackupRepositories(String token, String vdcId) {
+        try {
+            def settings = getPluginSettings()
+            String apiBaseUrl = settings.apiBaseUrl
+            String urlStr = "${apiBaseUrl}/api/admin/extension/vdc/${vdcId}/BackupRepositories"
+            URL url = new URL(urlStr)
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection()
+            connection.setRequestMethod("GET")
+            connection.setRequestProperty("x-vcloud-authorization", token)
+            connection.setRequestProperty("Accept", "application/*+xml;version=36.0")
+            connection.connect()
+            def xml = new groovy.util.XmlSlurper().parse(connection.inputStream)
+            connection.disconnect()
+            def repos = []
+            xml.BackupRepositoryReference.each { repo ->
+                repos << [
+                    name: repo.@name.text(),
+                    id: repo.@id.text(),
+                    href: repo.@href.text()
+                ]
+            }
+            return [repos, null]
+        } catch (Exception ex) {
+            log.error("Failed to fetch backup repositories: ${ex.message}")
+            return [null, "Fetch backup repositories error: ${ex.message}"]
+        }
+    }
+
+    // Helper to fetch vApp backups for a repository
+    private List fetchVappBackups(String token, String repoId) {
+        try {
+            def settings = getPluginSettings()
+            String apiBaseUrl = settings.apiBaseUrl
+            String urlStr = "${apiBaseUrl}/api/admin/extension/EmcBackupService/backupRepository/${repoId}/vapps?orderBy=id&reverse=true&filters=&show=backup&page=1&pageSize=100000"
+            URL url = new URL(urlStr)
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection()
+            connection.setRequestMethod("GET")
+            connection.setRequestProperty("x-vcloud-authorization", token)
+            connection.setRequestProperty("Accept", "application/*+xml;version=36.0")
+            connection.connect()
+            def xml = new groovy.util.XmlSlurper().parse(connection.inputStream)
+            connection.disconnect()
+            def vapps = []
+            xml.VappDetail.each { vapp ->
+                vapps << [
+                    vAppguid: vapp.@vAppguid.text(),
+                    vAppName: vapp.@vAppName.text(),
+                    status: vapp.@status.text(),
+                    vdcName: vapp.@vdcName.text(),
+                    expired: vapp.@expired.text(),
+                    eligible: vapp.@eligible.text(),
+                    numberOfVMs: vapp.@numberOfVMs.text(),
+                    policyName: vapp.policy?.@name?.text(),
+                    policyGuid: vapp.policy?.@guid?.text()
+                ]
+            }
+            return [vapps, null]
+        } catch (Exception ex) {
+            log.error("Failed to fetch vApp backups: ${ex.message}")
+            return [null, "Fetch vApp backups error: ${ex.message}"]
         }
     }
 
@@ -118,18 +182,31 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
         }
         // Add tabTitle to viewData for the template
         viewData['tabTitle'] = settings.instanceTabTitle
-        def (token, authError) = getSessionToken()
+        // Generate a nonce for CSP
+        String nonce = java.util.UUID.randomUUID().toString().replaceAll('-', '')
+        viewData['nonce'] = nonce
+        // Use the VDC ID from the user's environment
+        String vdcId = "c3577fa8-65a5-4a49-8c10-b3ed95f03689"
+        def (token, authError) = getVcdSessionToken()
         if (authError) {
             viewData['error'] = authError
-            viewData['uiExtensions'] = null
+            viewData['backups'] = null
         } else {
-            def (uiExtensions, uiExtensionsError) = fetchUiExtensions(token)
-            if (uiExtensionsError) {
-                viewData['error'] = uiExtensionsError
-                viewData['uiExtensions'] = null
+            def (repos, repoError) = fetchBackupRepositories(token, vdcId)
+            if (repoError || !repos || repos.size() == 0) {
+                viewData['error'] = repoError ?: 'No backup repositories found.'
+                viewData['backups'] = null
             } else {
-                viewData['uiExtensions'] = uiExtensions
-                viewData['error'] = null
+                // For demo, just use the first repository
+                def repoId = repos[0].id
+                def (backups, backupsError) = fetchVappBackups(token, repoId)
+                if (backupsError) {
+                    viewData['error'] = backupsError
+                    viewData['backups'] = null
+                } else {
+                    viewData['backups'] = backups
+                    viewData['error'] = null
+                }
             }
         }
         ViewModel<Instance> model = new ViewModel<>()
@@ -152,6 +229,7 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
 	ContentSecurityPolicy getContentSecurityPolicy() {
 		def csp = new ContentSecurityPolicy()
 		csp.frameSrc = "*"
+		csp.styleSrc = "'self' 'unsafe-inline'"
 		return csp
 	}
 }
