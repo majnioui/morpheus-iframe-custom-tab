@@ -67,8 +67,8 @@ class BackupInstanceTabPlugin extends Plugin {
             code: "backup-instance-tab-vcd-user",
             fieldName: "vcdUser",
             displayOrder: 3,
-            fieldLabel: "Cloud Director User",
-            helpText: 'Enter the vCD user (e.g., admin1@org2)',
+            fieldLabel: "VDC User",
+            helpText: 'Enter the VDC user (e.g., admin1@org2)',
             required: true,
             inputType: OptionType.InputType.TEXT
         )
@@ -78,8 +78,8 @@ class BackupInstanceTabPlugin extends Plugin {
             code: "backup-instance-tab-vcd-password",
             fieldName: "vcdPassword",
             displayOrder: 4,
-            fieldLabel: "Cloud Director Password",
-            helpText: 'Enter the password',
+            fieldLabel: "Password",
+            helpText: 'Enter VDC the password',
             required: true,
             inputType: OptionType.InputType.PASSWORD
         )

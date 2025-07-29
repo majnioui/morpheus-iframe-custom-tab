@@ -56,7 +56,7 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
             String vcdUser = settings.vcdUser
             String vcdPassword = settings.vcdPassword
             if (!apiBaseUrl || !vcdUser || !vcdPassword) {
-                return [null, "API base URL, vcdUser, or vcdPassword not configured in plugin settings."]
+                return [null, "API base URL, vdcUser, or vdcPassword not configured in plugin settings."]
             }
             URL url = new URL("${apiBaseUrl}/api/sessions")
             HttpURLConnection connection = (HttpURLConnection) url.openConnection()
@@ -83,28 +83,6 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
         } catch (Exception ex) {
             log.error("Failed to get vCD session token: ${ex.message}")
             return [null, "Auth error: ${ex.message}"]
-        }
-    }
-
-    // Helper method to fetch backups, returns [backups, error]
-    private List fetchBackups(String token) {
-        try {
-            def settings = getPluginSettings()
-            String apiBaseUrl = settings.apiBaseUrl
-            String urlStr = "${apiBaseUrl}/backups"
-            URL url = new URL(urlStr)
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection()
-            connection.setRequestMethod("GET")
-            connection.setRequestProperty("X-VCAV-Auth", token)
-            connection.setRequestProperty("Accept", "application/json")
-            connection.connect()
-            String response = connection.inputStream.text
-            connection.disconnect()
-            def json = new groovy.json.JsonSlurper().parseText(response)
-            return [json, null]
-        } catch (Exception ex) {
-            log.error("Failed to fetch backups: ${ex.message}")
-            return [null, "Fetch backups error: ${ex.message}"]
         }
     }
 
@@ -157,12 +135,7 @@ class BackupInstanceTabProvider extends AbstractInstanceTabProvider {
                     vAppguid: vapp.@vAppguid.text(),
                     vAppName: vapp.@vAppName.text(),
                     status: vapp.@status.text(),
-                    vdcName: vapp.@vdcName.text(),
-                    expired: vapp.@expired.text(),
-                    eligible: vapp.@eligible.text(),
-                    numberOfVMs: vapp.@numberOfVMs.text(),
-                    policyName: vapp.policy?.@name?.text(),
-                    policyGuid: vapp.policy?.@guid?.text()
+                    policyName: vapp.policy?.@name?.text()
                 ]
             }
             return [vapps, null]
